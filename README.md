@@ -1,1 +1,1 @@
-# image-analysis-project
+# Image-analysis-project
