@@ -30,6 +30,14 @@ Le reti neurali sono state implementate in 6 script diversi, a seconda della lor
 - `TrasfLearning.m` contiene la CNN AlexNet pre-allenata adattata alle immagini del dataset Kaggle.
 
 ## Dataset (Note preliminari)
+Di seguito si descrivono i dataset utilizzati per ogni CNN. Entrambi i dataset sono stati divisi in 90% training e 10% testing, supponendo che il numero di immagini per classe sia 60000, per evitare errori di overfitting.
+Inoltre le 5000 immagini di training sono state ulteriormente divise in 70% training e 30% validation per regolare l'architettura del classificatore stesso, aggiustandone i parametri.
+
+Per adattare i dataset alle dimensioni di input delle CNN sono usati gli script:
+- `readFunctionTrain` per la CNN da 0 e la CNN con l'augment. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere un'immagine di output di dimensione 32x32;
+- `readFunctionTrain2` per la CNN basata su AlexNet. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere un'immagine di output di dimensione 227x227.
+
+In realtà ogni immagine ha dimensioni [n_pixel x n_pixel x 3] in quanto è un'immagine a colori.
 ### CIFAR10
 Il dataset CIFAR-10 è formato da 60000 immagini colorate 32x32 disposte in 10 classi. Quindi, ci sono 6000 immagini per classe che sono divise in 5000 immagini di training e 1000 immagini di testing.
 
@@ -37,7 +45,43 @@ In questo progetto vengono usate solo 2 delle 10 classi appartenenti a questo da
 
 Per scaricare il dataset e prepararlo in maniera da disporre le immagini in apposite cartelle è stato utilizzato lo script `DownloadCIFAR10.m`, scaricato dal sito di matlab (link: https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/62990/versions/3/previews/DeepLearningDemos/DownloadCIFAR10.m/index.html).
 
+I dati sono importati come mostrato nel seguente esempio di codice:
+```matlab
+  #from TrainingCIFAR10.m
+  categories = {'Dog','Cat'};
+
+  rootFolder = 'cifar10/cifar10Train';
+  imds = imageDatastore(fullfile(rootFolder, categories), ...
+      'LabelSource', 'foldernames');
+  imds.ReadFcn = @readFunctionTrain;
+  
+  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.7,'randomized');     #divide train set e validation set
+```
+
 ### Kaggle
+Il dataset Kaggle è formato da 25000 immagini colorate di dimensioni diverse disposte in due classi (ovvero `cats` e `dogs`). Quindi per ogni classe si hanno a disposizione 12500 immagini totali.
+
+In questo progetto vengono usate solo 5000 immagini di training e 1000 immagini di testing per ogni classe. Le immagini di training sono le prime 5000, quelle di testing sono tra 5000 e 6000. 
+
+Il dataset è stato scaricato dal sito della Kaggle e le immagini sono state poste manualmente nelle rispettive cartelle.
+
+I dati sono importati come mostrato nel seguente esempio di codice:
+```matlab
+  #from Training.m
+  categories = {'dogs','cats'};
+
+  rootFolder = 'dataset/train_set';
+  imds = imageDatastore(fullfile(rootFolder, categories), ...
+      'LabelSource', 'foldernames');
+  imds.ReadFcn = @readFunctionTrain;
+
+  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.7,'randomized');
+```
+
+
+## Analisi delle CNN
+### 1. CNN from scratch
+
 
 
 
