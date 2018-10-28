@@ -84,6 +84,9 @@ Le reti neurali convoluzionali (CNN) hanno architetture che le rendono particola
 
 Siccome le CNN sono addestrate su molte immagini e lavorano con una grande quantità di dati e con diverse architetture, si ritiene opportuno utilizzare la GPU in quanto fondamentale per velocizzare significativamente il tempo necessario ad allenare un modello.
 
+Esempio di struttura di una CNN.
+![](images/CNN.png)
+
 ### 1. CNN from scratch
 
 
