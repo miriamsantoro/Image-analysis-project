@@ -88,7 +88,42 @@ Esempio di struttura di una CNN.
 ![](images/CNN.png)
 
 ### 1. CNN from scratch
+La CNN creata da 0 è formata da 15 strati con la seguente architettura:
+1. Livello di input
+2. Livello di Convoluzione 2-dim
+3. Livello di Max Pooling 2-dim,  It partitions the input image into a set of non-overlapping rectangles and, for each such sub-region, outputs the maximum. 
+4. Livello di passaggio per la funzione ReLU
+5. Livello di convoluzione 2-dim
+6. Livello di passaggio per la funzione ReLU
+7. Livello di Avg Pooling
+8. Livello di Convoluzione 2-dim
+9. Livello di passaggio per la funzione ReLU
+10. Livello di Avg Pooling
+11. Livello Fully Connected
+12. Livello di passaggio per la funzione ReLU
+13. Livello Fully Connected
+14. Livello per la funzione 'softmax'
+15. Livello finale di classificazione che sfrutta la cross entropy
 
+Per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte, dove il numero di "mescolamenti" è chiamato `MaxEpochs`.
+Inoltre per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `MiniBatchSize` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi.
 
+Come funzione di errore viene utilizzata `sgdm`, ovvero *Stochastic Gradient Descent with Momentum optimizer*, una funzione che esegue la discesa gradiente stocastica con un'ottimizzazione del momento che, in questo caso è stato lasciato di default.
+L'algoritmo di discesa gradiente aggiorna i parametri del network (pesi e bias, definiti nell'architettura) per minimizzare la funzione di perdita prendendo piccoli steps nella direzione del gradiente negativo della perdita, definiti da:
 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_{l}-\alpha&space;\Delta&space;E(\theta_l)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_{l}-\alpha&space;\Delta&space;E(\theta_l)" title="\theta_{l+1} = \theta_{l}-\alpha \Delta E(\theta_l)" /></a>
 
+dove l è il numero di iterazioni, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha&space;>0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha&space;>0" title="\alpha >0" /></a> è la frequenza di apprendimento, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> è il vettore parametro e <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E(\theta)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E(\theta)" title="E(\theta)" /></a> è la funzione di perdita. 
+L'algoritmo di discesa gradiente stocastica valuta il gradiente e aggiorna i parametri usando un subset del training set, chiamato mini-batch. Ad ogni iterazione, cioè ogni valutazione del gradiente usando il mini-batch, l'algoritmo fa un passo avanti nella minimizzazione la funzione di perdita. L'intero passo dell'algoritmo di training sull'intero set di training usando le mini-batches è un epoca-
+
+All'algoritmo di discesa stocastica viene aggiunto un termine di momento per ridurre l'oscillazione lungo il cammino di discesa profonda verso il massimo. In questo caso, l'equazione che governa questo processo è la seguente:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" title="\theta_{l+1} = \theta_l-\alpha \Delta E(\theta_l) +\gamma(\theta_l-\theta_{l-1})" /></a>
+
+dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`.
+
+Di seguito è riportato lo script relativo al training:
+
+I risultati sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
+
+Per quanto riguarda il testing si è verificato che il valore dell'accuratezza fosse compatibile con quello della validazione ottenuta durante il processo di training e di seguito sono mostrate ..
