@@ -201,4 +201,13 @@ Di seguito è riportato lo script relativo al testing:
 ```
 
 Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
-![](images/CIFAR10/Testing1.png) ![](images/CIFAR10/Testing2.png) ![](images/CIFAR10/Testing3.png) ![](images/CIFAR10/Testing4.png) ![](images/CIFAR10/Testing5.png) ![](images/CIFAR10/Testing6.png) ![](images/CIFAR10/Testing7.png) ![](images/CIFAR10/Testing8.png) ![](images/CIFAR10/Testing9.png) ![](images/CIFAR10/Testing10.png)
+![](images/CIFAR10/Testing1.png) 
+![](images/CIFAR10/Testing2.png) 
+![](images/CIFAR10/Testing3.png) 
+![](images/CIFAR10/Testing4.png) 
+![](images/CIFAR10/Testing5.png) 
+![](images/CIFAR10/Testing6.png) 
+![](images/CIFAR10/Testing7.png) 
+![](images/CIFAR10/Testing8.png)
+![](images/CIFAR10/Testing9.png) 
+![](images/CIFAR10/Testing10.png)
