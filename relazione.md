@@ -123,7 +123,82 @@ All'algoritmo di discesa stocastica viene aggiunto un termine di momento per rid
 dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`.
 
 Di seguito è riportato lo script relativo al training:
+```matlab
+  varSize = 32;
+  conv1 = convolution2dLayer(5,varSize,'Padding',2,'BiasLearnRateFactor',2);
+  conv1.Weights = gpuArray(single(randn([5 5 3 varSize])*0.0001));
+  fc1 = fullyConnectedLayer(64,'BiasLearnRateFactor',2);
+  fc1.Weights = gpuArray(single(randn([64 576])*0.1));
+  fc2 = fullyConnectedLayer(2,'BiasLearnRateFactor',2);
+  fc2.Weights = gpuArray(single(randn([2 64])*0.1));
+
+  layers = [
+      imageInputLayer([varSize varSize 3], 'Name', 'input');
+      conv1;
+      maxPooling2dLayer(3,'Stride',2, 'Name', 'max_pool');
+      reluLayer('Name', 'relu_1');
+      convolution2dLayer(5,32,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_2');
+      reluLayer('Name', 'relu_2');
+      averagePooling2dLayer(3,'Stride',2, 'Name', 'avg_pool_1');
+      convolution2dLayer(5,64,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_3');
+      reluLayer('Name', 'relu_3');
+      averagePooling2dLayer(3,'Stride',2, 'Name','avg_pool_2');
+      fc1;
+      reluLayer('Name', 'relu_4');
+      fc2;
+      softmaxLayer('Name', 'softmax');
+      classificationLayer('Name', 'classification')];
+
+  opts = trainingOptions('sgdm', ...
+      'InitialLearnRate', 0.001, ...
+      'L2Regularization', 0.004, ...
+      'MaxEpochs', 10, ...
+      'Shuffle','every-epoch', ...
+      'MiniBatchSize', 10, ...
+      'ValidationData',imdsValidation, ...
+      'ValidationFrequency',350, ...
+      'Verbose', true, ...
+      'VerboseFrequency', 350, ...
+      'Plots','training-progress', ...
+      'ExecutionEnvironment', 'auto');
+
+  [net, info] = trainNetwork(imdsTrain, layers, opts);
+
+  cifar10_net= net;
+  save cifar10_net
+```
 
 I risultati sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
 
-Per quanto riguarda il testing si è verificato che il valore dell'accuratezza fosse compatibile con quello della validazione ottenuta durante il processo di training e di seguito sono mostrate ..
+Per quanto riguarda il testing si è verificato che il valore dell'accuratezza fosse compatibile con quello della validazione ottenuta durante il processo di training. Una volta classificate, le immagini vengono mostrate con la relativa label contrassegnata con il colore rosso se è errata e verde se è giusta. Inoltre, l'accuratezza di testing è fornita dalla media tra i termini della diagonale della matrice di confusione ciascuno normalizzato per il numero totale di esempi di training.
+Di seguito è riportato lo script relativo al testing:
+```matlab
+  da TrainingCIFAR10.m
+  load cifar10_net;
+  rootFolder2 = 'cifar10/cifar10Test';
+  imdsTest = imageDatastore(fullfile(rootFolder2, categories), ...
+      'LabelSource', 'foldernames');
+  imdsTest.ReadFcn = @readFunctionTrain;
+
+  labels = classify(cifar10_net, imdsTest);
+
+  for i = 1:50
+      ii = randi(2000);
+      im = imread(imdsTest.Files{ii});
+      imshow(im);
+      if labels(ii) == imdsTest.Labels(ii)
+         colorText = 'g'; 
+      else
+          colorText = 'r';
+      end
+      title(char(labels(ii)),'Color',colorText);
+  end
+
+  % This could take a while if you are not using a GPU
+  confMat = confusionmat(imdsTest.Labels, labels);
+  confMat2 = confMat./sum(confMat,2);
+  mean(diag(confMat2))
+```
+
+Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+![](images/CIFAR10/Testing1.png) ![](images/CIFAR10/Testing2.png) ![](images/CIFAR10/Testing3.png) ![](images/CIFAR10/Testing4.png) ![](images/CIFAR10/Testing5.png) ![](images/CIFAR10/Testing6.png) ![](images/CIFAR10/Testing7.png) ![](images/CIFAR10/Testing8.png) ![](images/CIFAR10/Testing9.png) ![](images/CIFAR10/Testing10.png)
