@@ -98,11 +98,11 @@ Di seguito sono riportate e spiegate le varie tipologie di strati utilizzati nel
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" title="f(x) = \begin{cases} x, & x \geq 0 \\ 0, & x<0 \end{cases}" /></a>
 
-- **Livello di Cross Channel Normalization**
+- **Livello di Cross Channel Normalization**, utile per normalizzare il canale tramite la normalizzazione di una risposta locale del canale. Nello specifico questo canale rimpiazza ogni elemento con un valore normalizzato che ottiene usando gli elementi da un certo numero di canali vicini (elementi nella finestra di normalizzazione).
 
 - **Livello di Avg Pooling** che divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il valore medio.
 
-- **Livello di Dropout**
+- **Livello di Dropout**, utile per settare in maniera random gli elementi di input uguali a 0 con una data probabilità.
 
 - **Livello Fully Connected**, utile a collegare i neuroni a tutte le attivazioni nel livello precedente. Nello specifico l'attivazione è calcolata moltiplicando gli input per una matrice di pesi e aggiungendo un vettore di bias.
 
