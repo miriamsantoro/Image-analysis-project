@@ -89,21 +89,38 @@ Esempio di struttura di una CNN.
 
 ### 1. CNN from scratch
 La CNN creata da 0 è formata da 15 strati con la seguente architettura:
-1. Livello di input
-2. Livello di Convoluzione 2-dim
-3. Livello di Max Pooling 2-dim,  It partitions the input image into a set of non-overlapping rectangles and, for each such sub-region, outputs the maximum. 
-4. Livello di passaggio per la funzione ReLU
-5. Livello di convoluzione 2-dim
-6. Livello di passaggio per la funzione ReLU
-7. Livello di Avg Pooling
-8. Livello di Convoluzione 2-dim
-9. Livello di passaggio per la funzione ReLU
-10. Livello di Avg Pooling
-11. Livello Fully Connected
-12. Livello di passaggio per la funzione ReLU
-13. Livello Fully Connected
-14. Livello per la funzione 'softmax'
-15. Livello finale di classificazione che sfrutta la cross entropy
+1. Livello di Input dell'immagine che immette le immagini sulla rete e applica la normalizzazone dei dati
+
+2. Livello di Convoluzione 2-dim che applica filtri concoluzionali all'input. Questo livello convolve l'input muovendo i filtri delle dimensioni specificate verticalmente e orizzontalmente, calcolando il prodotto scalare dei pesi e dell'input e aggiungendo un termine di bias. I parametri del livello consistono in un set di filtri apprendibili (o kernel), che hanno un piccolo campo recettiv, ma si estengo lungo tutta la pronfondità del volume di input. Durante il passaggio all'indietro (forward) ogni filtro fa convoluzione lungo la larghezza e l'altezza del volume di input, calcolando il prodotto scalare tra le entrate del filtro e l'input e producendo una mappa di attivazione 2-dim di quel filtro. Il network quindi apprende i filtri che attiva quando trova qualche specifico tipo di feature a qualche posizione spaziale nell'input. L'operazione di convoluzione riduce il numero di parametri liberi, permettendo al network di esere più profondo con meno parametri. Ad esempio, usare regioni di dimensione 5x5, ognuna con gli stessi pesi condivisi, richiede solo 25 parametri apprendibili. Inquesto modo, risolve il problema dei gradienti che svaniscono o esplodono nell'allenamento tradizionale di network neurali multi strato con alcuni layer usando la backpropagation.
+
+The step size with which the filter moves is called a stride. 
+You can also apply zero padding to input image borders vertically and horizontally using the 'Padding' name-value pair argument. Padding is rows or columns of zeros added to the borders of an image input. By adjusting the padding, you can control the output size of the layer.
+
+
+3. Livello di Max Pooling 2-dim, che divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il massimo. Quindi, in poche parole, questo livello combina gli output (massimi) di ogni cluster di neuroni in uno strato all'interno di un singolo neurone nello strato successivo.
+
+4. Livello di passaggio per la funzione ReLU, utile per scartare i valori negativi ottenuti finora. Quindi è sostanzialmente una funzione di threshold del tipo:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" title="f(x) = \begin{cases} x, & x \geq 0 \\ 0, & x<0 \end{cases}" /></a>
+
+5. Livello di Convoluzione 2-dim, avente lo stesso scopo del livello 2.
+6. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4.
+7. Livello di Avg Pooling, che divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il valore medio.
+8. Livello di Convoluzione 2-dim, avente lo stesso scopo del livello 2.
+9. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4.
+10. Livello di Avg Pooling, avente lo stesso scopo del livello 7.
+11. Livello Fully Connected, utile a collegare i neuroni a tutte le attivazioni nel livello precedente. Nello specifico l'attivazione è calcolata moltiplicando gli input per una matrice di pesi e aggiungendo un vettore di bias.
+12. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4.
+13. Livello Fully Connected, avente lo stesso scopo del livello 12.
+14. Livello per la funzione di perdita 'softmax', utile a specificare come l'allenamento penalizzi la deviazione tra labels predette e vere. Questo strato definisce la funzione di attivazione di output, ovvero:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" title="y_r(x) =\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" /></a>
+
+dove <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" title="0 \leq y_r(x) \leq 1" /></a> e <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\sum^k_{j=1}y_j=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\sum^k_{j=1}y_j=1" title="\sum^k_{j=1}y_j=1" /></a>.
+
+15. Livello finale di classificazione che calcola la cross entropy loss perchè è un problema di classificazione tra classi che si escludono a vicenda. In definitiva, la funzione di perdita è:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" title="\text{loss}= \sum^N_{i=1}\sum^k_{j=1} t_{ij} \text{ln} y_{ij}" /></a>
+
 
 Per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte, dove il numero di "mescolamenti" è chiamato `MaxEpochs`.
 Inoltre per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `MiniBatchSize` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi.
