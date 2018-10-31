@@ -281,7 +281,7 @@ Queste operazioni geometriche sono permesse grazie il seguente script:
     'RandXScale',[0.5 2], ...
     'RandYShear', [0 15]);
 ```
-Le prime 8 immagini modificate, sono mostrate di seguito:
+Le prime 8 immagini modificate sono mostrate di seguito:
 
 ![](images/AugmentCIFAR10/augmented_images.png) 
 
@@ -301,3 +301,26 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/AugmentCIFAR10/Testing8.png)
 ![](images/AugmentCIFAR10/Testing9.png) 
 ![](images/AugmentCIFAR10/Testing10.png)
+
+#### 2b. MyNet
+Anche in questo caso si sono eseguite le stesse operazioni di augmenting esplicitate nella sezione *2a. CIFAR10* per allenare il network su immagini diverse rispetto a quelle di input e notare se le performance migliorassero o peggiorassero.
+
+Le prime 8 immagini modificate sono mostrate di seguito:
+![](images/AugmentMyNet/augment_my_net_images.png) 
+
+I risultati dell'allenamento sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
+
+![](images/AugmentMyNet/Training_progress.png) 
+
+Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+
+![](images/AugmentMyNet/Testing1.png) 
+![](images/AugmentMyNet/Testing2.png) 
+![](images/AugmentMyNet/Testing3.png) 
+![](images/AugmentMyNet/Testing4.png) 
+![](images/AugmentMyNet/Testing5.png) 
+![](images/AugmentMyNet/Testing6.png) 
+![](images/AugmentMyNet/Testing7.png) 
+![](images/AugmentMyNet/Testing8.png)
+![](images/AugmentMyNet/Testing9.png) 
+![](images/AugmentMyNet/Testing10.png)
