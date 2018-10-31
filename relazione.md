@@ -149,7 +149,7 @@ All'algoritmo di discesa stocastica viene aggiunto un termine di momento per rid
 <a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" title="\theta_{l+1} = \theta_l-\alpha \Delta E(\theta_l) +\gamma(\theta_l-\theta_{l-1})" /></a>
 
 dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`.
-#### CIFAR10
+#### 1a. CIFAR10
 Di seguito è riportato lo script relativo al training:
 ```matlab
   da training.CIFAR10
@@ -245,7 +245,7 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/CIFAR10/testing9.png) 
 ![](images/CIFAR10/testing10.png)
 
-#### MyNet
+#### 1b. MyNet
 Lo script relativo al training è lo stesso di CIFAR10, cambiando il nome delle directory di input e del network. In questo modo cambiano le immagini di input e i vari outputs e non vengono riportate per questioni di brevità.
 
 I risultati sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
@@ -264,3 +264,40 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/MyNet/Testing8.png)
 ![](images/MyNet/Testing9.png) 
 ![](images/MyNet/Testing10.png)
+
+
+### 2. CNN da zero con Augmenting
+#### 2a. CIFAR10
+In questo caso, per il training della CNN si è utilizzata la stessa architettura, già mostrata nella sezione *1a. CIFAR10*. Sono differenti, tuttavia, le immagini di input che prima vengono:
+- riflesse rispetto all'asse orizzontale con una probabilità del 50%;
+- scalate in maniera random sull'asse delle x entro i limiti definiti;
+- tagliate in maniera random lungo l'asse delle y entro i limiti definiti.
+Queste operazioni geometriche sono permesse grazie il seguente script:
+```matlab
+  #da AugmentCIFAR10.m
+  
+  augmenter = imageDataAugmenter( ...
+    'RandXReflection', true(1), ...
+    'RandXScale',[0.5 2], ...
+    'RandYShear', [0 15]);
+```
+Le prime 8 immagini modificate, sono mostrate di seguito:
+
+![](images/AugmentCIFAR10/augmented_images.png) 
+
+I risultati dell'allenamento sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
+
+![](images/AugmentCIFAR10/Training_progress.png) 
+
+Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+
+![](images/AugmentCIFAR10/Testing1.png) 
+![](images/AugmentCIFAR10/Testing2.png) 
+![](images/AugmentCIFAR10/Testing3.png) 
+![](images/AugmentCIFAR10/Testing4.png) 
+![](images/AugmentCIFAR10/Testing5.png) 
+![](images/AugmentCIFAR10/Testing6.png) 
+![](images/AugmentCIFAR10/Testing7.png) 
+![](images/AugmentCIFAR10/Testing8.png)
+![](images/AugmentCIFAR10/Testing9.png) 
+![](images/AugmentCIFAR10/Testing10.png)
