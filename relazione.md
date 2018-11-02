@@ -117,19 +117,19 @@ dove <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;0&space;\
 
 ### 1. CNN from scratch
 La CNN creata da 0 è formata da 15 strati con la seguente architettura:
-1. Livello di Input dell'immagine;
-2. Livello di Convoluzione 2-dim;
-3. Livello di Max Pooling 2-dim;
+1. Livello di Input che ha le stesse dimensioni delle immagini in input (in questo caso, [32x32x3]);
+2. Livello di Convoluzione 2-dim con 32 filtri(kernels) di dimensioni 5x5x3, un passo (stride) di [1 1] e uno zero-padding di dimensione [2 2 2 2] (aggiunge due righe al top-bottom e due colonne a destra-sinistra) ;
+3. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
 4. Livello di passaggio per la funzione ReLU;
-5. Livello di Convoluzione 2-dim, avente lo stesso scopo del livello 2;
-6. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4;
-7. Livello di Avg Pooling;
-8. Livello di Convoluzione 2-dim, avente lo stesso scopo del livello 2;
-9. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4;
-10. Livello di Avg Pooling, avente lo stesso scopo del livello 7;
-11. Livello Fully Connected;
-12. Livello di passaggio per la funzione ReLU, avente lo stesso scopo del livello 4;
-13. Livello Fully Connected, avente lo stesso scopo del livello 12;
+5. Livello di Convoluzione 2-dim con 32 filtri (kernels) di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2] e un fattore di apprendimento per i bias di 2 (fattore di apprendimento per i bias nel layer è due volte la frequenza di apprendimento corrente globale);
+6. Livello di passaggio per la funzione ReLU;
+7. Livello di Avg Pooling 2-dim con dimensione di pool 3x3 e passo di [2 2];
+8. Livello di Convoluzione 2-dim con 64 kernels di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2] e un fattore di apprendimento per i bias di 2;
+9. Livello di passaggio per la funzione ReLU;
+10. Livello di Avg Pooling con dimensione di pool 3x3 e passo di dimensione [2 2];
+11. Livello Fully Connected con 64 outputs e fattore di apprendimento per i bias di 2;
+12. Livello di passaggio per la funzione ReLU;
+13. Livello Fully Connected con 2 outputs e fattore di apprendimento per i bias di 2;
 14. Livello per la funzione di perdita 'softmax';
 15. Livello finale di classificazione.
 
