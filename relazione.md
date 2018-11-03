@@ -399,3 +399,58 @@ Di seguito è riportato lo script relativo al training:
   save netTransfer_CIFAR10
 ```
 
+I risultati dell'allenamento sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
+
+![](images/TransfLearningCIFAR10/Training_progress.png) 
+
+Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il train set e il nome del network.
+Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+
+![](images/TransfLearningCIFAR10/Testing1.png) 
+![](images/TransfLearningCIFAR10/Testing2.png) 
+![](images/TransfLearningCIFAR10/Testing3.png) 
+![](images/TransfLearningCIFAR10/Testing4.png) 
+![](images/TransfLearningCIFAR10/Testing5.png) 
+![](images/TransfLearningCIFAR10/Testing6.png) 
+![](images/TransfLearningCIFAR10/Testing7.png) 
+![](images/TransfLearningCIFAR10/Testing8.png)
+![](images/TransfLearningCIFAR10/Testing9.png) 
+![](images/TransfLearningCIFAR10/Testing10.png)
+
+#### 3b. MyNet
+Anche in questo caso si è eseguito lo stesso training mostrato in sezione *3a. CIFAR10*, modificando opportunamente il dataset e il nome del network da allenare e salvare.
+
+I risultati dell'allenamento sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
+
+![](images/TransfLearningMyNet/Training_progress.png) 
+
+Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il train set e il nome del network.
+Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+
+![](images/TransfLearningMyNet/Testing1.png) 
+![](images/TransfLearningMyNet/Testing2.png) 
+![](images/TransfLearningMyNet/Testing3.png) 
+![](images/TransfLearningMyNet/Testing4.png) 
+![](images/TransfLearningMyNet/Testing5.png) 
+![](images/TransfLearningMyNet/Testing6.png) 
+![](images/TransfLearningMyNet/Testing7.png) 
+![](images/TransfLearningMyNet/Testing8.png)
+![](images/TransfLearningMyNet/Testing9.png) 
+![](images/TransfLearningMyNet/Testing10.png)
+
+## Risultati e commenti finali
+Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% training, 20% validation e stesso numero di esempi tra validation e testing (tenendo contro che il testing è realizzato con nuovi esempi), sono i seguenti:
+
+|CNN per CIFAR10|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
+|:--|:--:|:--:|:--:|
+|1. Da zero|7/114|93.86%|93.86%|
+|2. Da zero + Augumentation|8/114|92.98%|93.86%|
+|3. Pre-allenata con AlexNet|7/114|93.86%|93.86%|
+
+|CNN per MyNet|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
+|:--|:--:|:--:|:--:
+|1. Da zero|7/114|93.86%|93.86%|
+|2. Da zero + Augmentation|8/114|92.98%|93.86%|
+|3. Pre-allenata con AlexNet|7/114|93.86%|93.86%|
+
+Osservando la tabella è possibile notare come, nonostante i dataset siano diversi, in entrambi i casi il classificatore migliore sia quello basato sulla CNN pre-allenata con AlexNet. Questo risultato è compatibile con quanto ci si aspetti dalla teoria in quanto è formato da un maggiore numero di strati ed è pre-allenato su altre immagini tra cui quelle delle stesse categorie rispetto a quelle che si vogliono classificare.
