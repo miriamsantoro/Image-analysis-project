@@ -148,11 +148,11 @@ All'algoritmo di discesa stocastica viene aggiunto un termine di momento per rid
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" title="\theta_{l+1} = \theta_l-\alpha \Delta E(\theta_l) +\gamma(\theta_l-\theta_{l-1})" /></a>
 
-dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`.
+dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`=0.0001.
 #### 1a. CIFAR10
 Di seguito è riportato lo script relativo al training:
 ```matlab
-  da training.CIFAR10
+  #da trainingCIFAR10.m
   varSize = 32;
   conv1 = convolution2dLayer(5,varSize,'Padding',2,'BiasLearnRateFactor',2);
   conv1.Weights = gpuArray(single(randn([5 5 3 varSize])*0.0001));
@@ -324,3 +324,78 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/AugmentMyNet/Testing8.png)
 ![](images/AugmentMyNet/Testing9.png) 
 ![](images/AugmentMyNet/Testing10.png)
+
+### 3. CNN con transfer learning
+#### 3a. CIFAR10
+Si è utilizzato un network pre-allenato chiamato `AlexNet` che è una CNN allenata su più di un milione di immagini provenienti dal database ImageNet contenente immagini di varie categorie, tra cui anche animali, nello specifico cani e gatti. Il vantaggio nell'usare il transfer learning consiste solitamente in una maggiore velocità e facilità di ritocchi del network e nel fatto che possa essere usato anche quando non si ha a disposizione un grande numero di immagini di training.
+Tramite le seguenti righe di codice è possibile guardare la struttura interna di questo network e capire come adattarla.
+```matlab
+  net = alexnet;
+  analyzeNetwork(net)
+```
+Dall'analisi della struttura è emerso che gli ultimi tre strati dovessero essere adattati alla classificazione desiderata. Nello specifico, mentre nella struttura originale il 23-esimo strato è uno strato fully-connected con output 1000 in quanto l'obiettivo è la classificazione di immagini tra 1000 classi; nel network modificato il 23-esimo strato ha output 2 in quantola classificazione è legata solo a due classi (ovvero *Cat* e *Dog*).
+
+In definitiva, la CNN è costituita da 25 strati e ha la seguente architettura:
+1. Livello di Input che ha le stesse dimensioni delle immagini in input (in questo caso, [227x227x3]);
+2. Livello di Convoluzione 2-dim con 96 filtri(kernels) di dimensioni 11x11x3 e passo di [4 4];
+3. Livello di passaggio per la funzione ReLU;
+4. Livello di Cross Channel Normalization con 5 canali per elemento;
+5. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
+6. Livello di Convoluzione 2-dim con 256 filtri (kernels) di dimensioni 5x5x48, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2];
+7. Livello di passaggio per la funzione ReLU;
+8. Livello di Cross Channel Normalization con 5 canali per elemento;
+9. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
+10. Livello di Convoluzione 2-dim con 384 filtri (kernels) di dimensioni 3x3x256, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+11. Livello di passaggio per la funzione ReLU;
+12. Livello di Convoluzione 2-dim con 384 filtri (kernels) di dimensioni 3x3x192, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+13. Livello di passaggio per la funzione ReLU;
+14. Livello di Convoluzione 2-dim con 256 filtri (kernels) di dimensioni 3x3x192, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+15. Livello di passaggio per la funzione ReLU;
+16. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
+17. Livello Fully Connected con 4096 outputs;
+18. Livello di passaggio per la funzione ReLU;
+19. Livello di Dropout con un dropout del 50%;
+20. Livello Fully Connected con 4096 outputs;
+21. Livello di passaggio per la funzione ReLU;
+22. Livello di Dropout con un dropout del 50%;
+23. Livello Fully Connected con 2 outputs;
+24. Livello per la funzione di perdita 'softmax';
+25. Livello finale di classificazione.
+
+Anche in questo caso per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte e per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `MiniBatchSize` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi.
+
+Come funzione di errore viene utilizzata `sgdm` con momento lasciato di default e frequenza di apprendimento iniziale pari a `InitialLearnRate`=0.0001.
+
+#### 3a. CIFAR10
+Di seguito è riportato lo script relativo al training:
+```matlab
+  #da TransfLearning_CIFAR10.m
+  
+  net = alexnet;
+  layersTransfer = net.Layers(1:end-3);
+
+  numClasses = 2;
+
+  layers = [
+      layersTransfer
+      fullyConnectedLayer(numClasses,'WeightLearnRateFactor',20,'BiasLearnRateFactor',20)
+      softmaxLayer
+      classificationLayer];
+
+  options = trainingOptions('sgdm', ...
+      'MiniBatchSize',10, ...
+      'MaxEpochs',5, ...
+      'InitialLearnRate',0.0001, ...
+      'Shuffle','every-epoch', ...
+      'ValidationData',imdsValidation, ...
+      'ValidationFrequency',400, ...
+      'Verbose',true, ...
+      'VerboseFrequency', 400, ...
+      'Plots','training-progress', ...
+      'ExecutionEnvironment', 'auto');
+
+  netTransfer_CIFAR10 = trainNetwork(imdsTrain,layers,options);
+
+  save netTransfer_CIFAR10
+```
+
