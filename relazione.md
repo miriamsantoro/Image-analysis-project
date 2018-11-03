@@ -443,14 +443,14 @@ Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% tr
 
 |CNN per CIFAR10|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
 |:--|:--:|:--:|:--:|
-|1. Da zero|7/114|93.86%|93.86%|
-|2. Da zero + Augumentation|8/114|92.98%|93.86%|
-|3. Pre-allenata con AlexNet|7/114|93.86%|93.86%|
+|1. Da zero|580/2000|71.0%|73.05%|
+|2. Da zero + Augumentation|636/2000|68.2%|68.25%|
+|3. Pre-allenata con AlexNet|220/2000|89.0%|89.15%|
 
 |CNN per MyNet|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
 |:--|:--:|:--:|:--:
-|1. Da zero|7/114|93.86%|93.86%|
-|2. Da zero + Augmentation|8/114|92.98%|93.86%|
-|3. Pre-allenata con AlexNet|7/114|93.86%|93.86%|
+|1. Da zero|491/2000|75.4%|75.55%|
+|2. Da zero + Augmentation|560/2000|72.0%|71.90%|
+|3. Pre-allenata con AlexNet|53/2000|97.4%|97.25%|
 
 Osservando la tabella è possibile notare come, nonostante i dataset siano diversi, in entrambi i casi il classificatore migliore sia quello basato sulla CNN pre-allenata con AlexNet. Questo risultato è compatibile con quanto ci si aspetti dalla teoria in quanto è formato da un maggiore numero di strati ed è pre-allenato su altre immagini tra cui quelle delle stesse categorie rispetto a quelle che si vogliono classificare.
