@@ -30,24 +30,25 @@ Le reti neurali sono state implementate in 6 script diversi, a seconda della lor
 - `TrasfLearning.m` contiene la CNN AlexNet pre-allenata adattata alle immagini del dataset Kaggle.
 
 ## Dataset (Note preliminari)
-Di seguito si descrivono i dataset utilizzati per ogni CNN. Entrambi i dataset sono stati divisi in 90% training e 10% testing, supponendo che il numero di immagini per classe sia 60000, per evitare errori di overfitting.
-Inoltre le 5000 immagini di training sono state ulteriormente divise in 70% training e 30% validation per regolare l'architettura del classificatore stesso, aggiustandone i parametri.
+Di seguito si descrivono i dataset utilizzati per ogni CNN. Entrambi i dataset possiedono 5000 elementi per il training e 1000 elementi per il testing e questa divisione è stata realizzata al fine di evitare errori di overfitting.
+Inoltre, le 5000 immagini di training sono  ulteriormente divise in 80% training e 20% validation per regolare l'architettura del classificatore stesso, aggiustandone i parametri.
 
 Per adattare i dataset alle dimensioni di input delle CNN sono usati gli script:
-- `readFunctionTrain` per la CNN da 0 e la CNN con l'augment. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere un'immagine di output di dimensione 32x32;
-- `readFunctionTrain2` per la CNN basata su AlexNet. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere un'immagine di output di dimensione 227x227.
+- `readFunctionTrain` per la CNN da 0 e la CNN con l'augmentation. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere in output un'immagine di dimensione 32x32;
+- `readFunctionTrain2` per la CNN basata su AlexNet. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere in output un'immagine di dimensione 227x227.
 
-In realtà ogni immagine ha dimensioni [n_pixel x n_pixel x 3] in quanto è un'immagine a colori.
+In realtà, ogni immagine, essendo a colori, ha dimensioni [n_pixel x n_pixel x 3].
 ### CIFAR10
-Il dataset CIFAR-10 è formato da 60000 immagini colorate 32x32 disposte in 10 classi. Quindi, ci sono 6000 immagini per classe che sono divise in 5000 immagini di training e 1000 immagini di testing.
+Il dataset CIFAR-10 è formato da 60000 immagini colorate 32x32 disposte in 10 classi. Quindi, ci sono 6000 immagini per classe divise, come già esplicitato, in 5000 immagini di training e 1000 immagini di testing.
 
 In questo progetto vengono usate solo 2 delle 10 classi appartenenti a questo dataset: `Cat` e `Dog`.
 
 Per scaricare il dataset e prepararlo in maniera da disporre le immagini in apposite cartelle è stato utilizzato lo script `DownloadCIFAR10.m`, scaricato dal sito di matlab (link: https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/62990/versions/3/previews/DeepLearningDemos/DownloadCIFAR10.m/index.html).
 
-I dati sono importati come mostrato nel seguente esempio di codice:
+I dati, comprendenti immagini e labels, sono importati nel progetto come mostrato nel seguente esempio di codice:
 ```matlab
-  #from TrainingCIFAR10.m
+  #da TrainingCIFAR10.m
+
   categories = {'Dog','Cat'};
 
   rootFolder = 'cifar10/cifar10Train';
@@ -55,19 +56,20 @@ I dati sono importati come mostrato nel seguente esempio di codice:
       'LabelSource', 'foldernames');
   imds.ReadFcn = @readFunctionTrain;
   
-  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.7,'randomized');     #divide train set e validation set
+  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.8,'randomized');     #divide train set e validation set
 ```
 
 ### Kaggle
 Il dataset Kaggle è formato da 25000 immagini colorate di dimensioni diverse disposte in due classi (ovvero `cats` e `dogs`). Quindi per ogni classe si hanno a disposizione 12500 immagini totali.
 
-In questo progetto vengono usate solo 5000 immagini di training e 1000 immagini di testing per ogni classe. Le immagini di training sono le prime 5000, quelle di testing sono tra 5000 e 6000. 
+In questo progetto per ogni classe vengono usate solo 5000 immagini di training (da *cat.0* a *cat.4999* e da *dog.0* a *dog.4999*) e 1000 immagini di testing (da *cat.5000* a *cat.5999* e da *dog.5000* a *dog.5999*).
 
 Il dataset è stato scaricato dal sito della Kaggle e le immagini sono state poste manualmente nelle rispettive cartelle.
 
-I dati sono importati come mostrato nel seguente esempio di codice:
+I dati sono importati nel progetto come mostrato nel seguente esempio di codice:
 ```matlab
-  #from Training.m
+  #da Training.m
+
   categories = {'dogs','cats'};
 
   rootFolder = 'dataset/train_set';
@@ -75,126 +77,136 @@ I dati sono importati come mostrato nel seguente esempio di codice:
       'LabelSource', 'foldernames');
   imds.ReadFcn = @readFunctionTrain;
 
-  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.7,'randomized');
+  [imdsTrain,imdsValidation] = splitEachLabel(imds,0.8,'randomized');
 ```
 
 
 ## Analisi delle CNN
-Le reti neurali convoluzionali (CNN) hanno architetture che le rendono particolarmente adatte al riconoscimento delle immagini, in maniera da poterle classificare. Nello specifico, i diversi layer della rete neurale imparano a rilevare e identificare le diverse features delle immagini. A questi layer si aggiungono il penultimo layer che genera un vettore delle stesse dimensioni del numero di classi che la rete deve essere in grado di prevedere e l'ultimo layer che fornisce l'output di classificazione.
+Le reti neurali convoluzionali (CNN) hanno architetture che le rendono particolarmente adatte al riconoscimento delle immagini, in maniera da poterle classificare. Nello specifico:
+-  diversi layers della rete neurale imparano a rilevare e identificare le diverse features delle immagini;
+-  il penultimo layer genera un vettore delle stesse dimensioni del numero di classi che la rete deve essere in grado di prevedere 
+- l'ultimo layer che fornisce l'output di classificazione.
 
-Siccome le CNN sono addestrate su molte immagini e lavorano con una grande quantità di dati e con diverse architetture, si ritiene opportuno utilizzare la GPU in quanto fondamentale per velocizzare significativamente il tempo necessario ad allenare un modello.
+Siccome le CNN sono addestrate su molte immagini e lavorano con una grande quantità di dati e con diverse architetture, si ritiene opportuno utilizzare la GPU per velocizzare significativamente il tempo necessario per allenare un modello.
 
 Esempio di struttura di una CNN.
 ![](images/CNN.png)
 
-Di seguito sono riportate e spiegate le varie tipologie di strati utilizzati nelle diverse CNN:
-- **Livello di Input** dell'immagine che immette le immagini sulla rete e applica la normalizzazone dei dati
+Di seguito sono riportate e spiegate le varie tipologie di layers utilizzate nelle diverse CNN all'interno di questo progetto:
+- **Livello di Input** dell'immagine: immette le immagini nella rete e applica la normalizzazone dei dati.
 
-- **Livello di Convoluzione 2-dim** che applica filtri concoluzionali all'input. Questo livello convolve l'input muovendo i filtri delle dimensioni specificate verticalmente e orizzontalmente, calcolando il prodotto scalare dei pesi e dell'input e aggiungendo un termine di bias. I parametri del livello consistono in un set di filtri apprendibili (o kernel), che hanno un piccolo campo recettiv, ma si estengo lungo tutta la pronfondità del volume di input. Durante il passaggio all'indietro (forward) ogni filtro fa convoluzione lungo la larghezza e l'altezza del volume di input, calcolando il prodotto scalare tra le entrate del filtro e l'input e producendo una mappa di attivazione 2-dim di quel filtro. Il network quindi apprende i filtri che attiva quando trova qualche specifico tipo di feature a qualche posizione spaziale nell'input. L'operazione di convoluzione riduce il numero di parametri liberi, permettendo al network di esere più profondo con meno parametri. Ad esempio, usare regioni di dimensione 5x5, ognuna con gli stessi pesi condivisi, richiede solo 25 parametri apprendibili. Inquesto modo, risolve il problema dei gradienti che svaniscono o esplodono nell'allenamento tradizionale di network neurali multi strato con alcuni layer usando la backpropagation. La dimensione di step con cui il filtro si muove è chiamata *stride*. Si può anche applicare uno zero padding ai limiti dell'immagine di input verticalmente e orizzontalmente usando il *'Padding'*. Il padding consiste in righe e colonne di zeri aggiunti ai limiti di un immagine di input. Aggiustando il padding, si può controllare la dimensione di output dello strato.
+- **Livello di Convoluzione 2-dim**: applica filtri convoluzionali all'input. In questo livello viene eseguita la convoluzione che è un'operazione che consiste nel muovere filtri di specifiche dimensioni verticalmente e orizzontalmente sull'immagine di input, calcolare il prodotto scalare dei pesi e aggiungere, eventualmente, un termine di bias.
+I parametri del livello consistono, quindi, in un set di filtri apprendibili (o kernel), che hanno un piccolo campo recettivo, ma si estendono lungo tutta la pronfondità del volume di input, compiono convoluzione durante il passaggio all'indietro (forward) ogni filtro fa convoluzione lungo il volume di input e producono una mappa di attivazione 2-dim. L'operazione di convoluzione riduce il numero di parametri liberi, permettendo al network di essere più profondo con meno parametri. Ad esempio, usare regioni di dimensione 5x5, ognuna con gli stessi pesi condivisi, richiede solo 25 parametri apprendibili. In questo modo, risolve il problema dei gradienti che svaniscono o esplodono nell'allenamento tradizionale di network neurali multi-strato. 
 
-- **Livello di Max Pooling 2-dim** che divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il massimo. Quindi, in poche parole, questo livello combina gli output (massimi) di ogni cluster di neuroni in uno strato all'interno di un singolo neurone nello strato successivo.
+    - La dimensione di step con cui il filtro si muove è chiamata `'Stride'` ed è regolabile. 
 
-- **Livello di passaggio per la funzione ReLU**, utile per scartare i valori negativi ottenuti finora. Quindi è sostanzialmente una funzione di threshold del tipo: 
+    - Si può anche applicare uno zero padding all'immagine di input, consistente nell'agginuta di righe e colonne ai limiti dell'immagine stessa. Questo viene fatto regolando il termine `'Padding'` e si usa per controllare la dimensione di output dello strato.
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" title="f(x) = \begin{cases} x, & x \geq 0 \\ 0, & x<0 \end{cases}" /></a>
+- **Livello di Max Pooling 2-dim**: divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il massimo. 
+Quindi si passa da cluster di neuroni nello strato di partenza a singoli neuroni in quello di output (processato).
 
-- **Livello di Cross Channel Normalization**, utile per normalizzare il canale tramite la normalizzazione di una risposta locale del canale. Nello specifico questo canale rimpiazza ogni elemento con un valore normalizzato che ottiene usando gli elementi da un certo numero di canali vicini (elementi nella finestra di normalizzazione).
+- **Livello di passaggio per la funzione ReLU**: scarta i valori negativi ottenuti finora, applicando una funzione di threshold del tipo: 
 
-- **Livello di Avg Pooling** che divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il valore medio.
+    <a href="https://www.codecogs.com/eqnedit.php?latex=f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(x)&space;=&space;\begin{cases}&space;x,&space;&&space;x&space;\geq&space;0&space;\\&space;0,&space;&&space;x<0&space;\end{cases}" title="f(x) = \begin{cases} x, & x \geq 0 \\ 0, & x<0 \end{cases}" /></a>
 
-- **Livello di Dropout**, utile per settare in maniera random gli elementi di input uguali a 0 con una data probabilità.
+- **Livello di Cross Channel Normalization**: normalizza il canale sfruttando tramite la risposta locale del canale. Nello specifico rimpiazza ogni elemento con un valore normalizzato, ottenuto usando gli elementi provenienti da un certo numero di canali vicini (elementi nella finestra di normalizzazione).
 
-- **Livello Fully Connected**, utile a collegare i neuroni a tutte le attivazioni nel livello precedente. Nello specifico l'attivazione è calcolata moltiplicando gli input per una matrice di pesi e aggiungendo un vettore di bias.
+- **Livello di Avg Pooling**: divide l'immagine di input in un set di rettangoli che non si sovrappongono e, per ogni sotto-regione, fornisce in output il valore medio.
 
-- **Livello per la funzione di perdita 'softmax'**, utile a specificare come l'allenamento penalizzi la deviazione tra labels predette e vere. Questo strato definisce la funzione di attivazione di output, ovvero:
+- **Livello di Dropout**: setta in modo random gli elementi di input uguali a 0 con una data probabilità.
+
+- **Livello Fully Connected**: collega i neuroni a tutte le attivazioni nel livello precedente. L'attivazione è calcolata moltiplicando gli input per una matrice di pesi e aggiungendo un vettore di bias.
+
+- **Livello per la funzione di perdita 'softmax'**: specifica come l'allenamento penalizzi la deviazione tra labels predette e vere. Questo strato definisce la funzione di attivazione di output, ovvero:
 
    <a href="https://www.codecogs.com/eqnedit.php?latex=y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" title="y_r(x) =\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" /></a>
 
-dove <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" title="0 \leq y_r(x) \leq 1" /></a> e <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\sum^k_{j=1}y_j=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\sum^k_{j=1}y_j=1" title="\sum^k_{j=1}y_j=1" /></a>.
+    dove <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;0&space;\leq&space;y_r(x)&space;\leq&space;1" title="0 \leq y_r(x) \leq 1" /></a> e <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\sum^k_{j=1}y_j=1" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\sum^k_{j=1}y_j=1" title="\sum^k_{j=1}y_j=1" /></a>.
 
-- **Livello finale di classificazione** che calcola la cross entropy loss perchè è un problema di classificazione tra classi che si escludono a vicenda. In definitiva, la funzione di perdita è:
-<a href="https://www.codecogs.com/eqnedit.php?latex=\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" title="\text{loss}= \sum^N_{i=1}\sum^k_{j=1} t_{ij} \text{ln} y_{ij}" /></a>.
+- **Livello finale di classificazione**: calcola la cross entropy loss in quanto il progetto ha come scopo la classificazione tra classi che si escludono a vicenda. In definitiva, la funzione di perdita è:
+    <a href="https://www.codecogs.com/eqnedit.php?latex=\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\text{loss}=&space;\sum^N_{i=1}\sum^k_{j=1}&space;t_{ij}&space;\text{ln}&space;y_{ij}" title="\text{loss}= \sum^N_{i=1}\sum^k_{j=1} t_{ij} \text{ln} y_{ij}" /></a>.
 
 ### 1. CNN from scratch
 La CNN creata da 0 è formata da 15 strati con la seguente architettura:
 1. Livello di Input che ha le stesse dimensioni delle immagini in input (in questo caso, [32x32x3]);
-2. Livello di Convoluzione 2-dim con 32 filtri(kernels) di dimensioni 5x5x3, un passo (stride) di [1 1] e uno zero-padding di dimensione [2 2 2 2] (aggiunge due righe al top-bottom e due colonne a destra-sinistra) ;
+2. Livello di Convoluzione 2-dim con 32 filtri (kernels) di dimensioni 5x5x3, passo di dimensione [1 1] e zero-padding di dimensione [2 2 2 2];
 3. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
 4. Livello di passaggio per la funzione ReLU;
-5. Livello di Convoluzione 2-dim con 32 filtri (kernels) di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2] e un fattore di apprendimento per i bias di 2 (fattore di apprendimento per i bias nel layer è due volte la frequenza di apprendimento corrente globale);
+5. Livello di Convoluzione 2-dim con 32 filtri (kernels) di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2];
 6. Livello di passaggio per la funzione ReLU;
-7. Livello di Avg Pooling 2-dim con dimensione di pool 3x3 e passo di [2 2];
-8. Livello di Convoluzione 2-dim con 64 kernels di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2] e un fattore di apprendimento per i bias di 2;
+7. Livello di Avg Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
+8. Livello di Convoluzione 2-dim con 64 kernels di dimensioni 5x5x32, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2];
 9. Livello di passaggio per la funzione ReLU;
 10. Livello di Avg Pooling con dimensione di pool 3x3 e passo di dimensione [2 2];
-11. Livello Fully Connected con 64 outputs e fattore di apprendimento per i bias di 2;
+11. Livello Fully Connected con 64 outputs;
 12. Livello di passaggio per la funzione ReLU;
-13. Livello Fully Connected con 2 outputs e fattore di apprendimento per i bias di 2;
+13. Livello Fully Connected con 2 outputs;
 14. Livello per la funzione di perdita 'softmax';
 15. Livello finale di classificazione.
 
-Per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte, dove il numero di "mescolamenti" è chiamato `MaxEpochs`.
-Inoltre per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `MiniBatchSize` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi.
+Per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte, dove il numero di "mescolamenti" è chiamato `'MaxEpochs'`.
+Inoltre per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `'MiniBatchSize'` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi. In questo caso si è specificato il rimescolamento ad ogni epoch tramite la variabile `'Shuffle'`. 
 
-Come funzione di errore viene utilizzata `sgdm`, ovvero *Stochastic Gradient Descent with Momentum optimizer*, una funzione che esegue la discesa gradiente stocastica con un'ottimizzazione del momento che, in questo caso è stato lasciato di default.
-L'algoritmo di discesa gradiente aggiorna i parametri del network (pesi e bias, definiti nell'architettura) per minimizzare la funzione di perdita prendendo piccoli steps nella direzione del gradiente negativo della perdita, definiti da:
-
-<a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_{l}-\alpha&space;\Delta&space;E(\theta_l)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_{l}-\alpha&space;\Delta&space;E(\theta_l)" title="\theta_{l+1} = \theta_{l}-\alpha \Delta E(\theta_l)" /></a>
-
-dove l è il numero di iterazioni, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha&space;>0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha&space;>0" title="\alpha >0" /></a> è la frequenza di apprendimento, <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> è il vettore parametro e <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E(\theta)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E(\theta)" title="E(\theta)" /></a> è la funzione di perdita. 
-L'algoritmo di discesa gradiente stocastica valuta il gradiente e aggiorna i parametri usando un subset del training set, chiamato mini-batch. Ad ogni iterazione, cioè ogni valutazione del gradiente usando il mini-batch, l'algoritmo fa un passo avanti nella minimizzazione la funzione di perdita. L'intero passo dell'algoritmo di training sull'intero set di training usando le mini-batches è un epoca-
-
-All'algoritmo di discesa stocastica viene aggiunto un termine di momento per ridurre l'oscillazione lungo il cammino di discesa profonda verso il massimo. In questo caso, l'equazione che governa questo processo è la seguente:
+Come funzione di errore viene utilizzata `'sgdm'`, ovvero *Stochastic Gradient Descent with Momentum optimizer*, una funzione che esegue la discesa gradiente stocastica con un'ottimizzazione del momento che, in questo caso è lasciato di default.
+L'algoritmo di discesa gradiente aggiorna i parametri del network (pesi e bias, definiti nell'architettura) per minimizzare la funzione di perdita prendendo piccoli steps nella direzione del gradiente negativo della perdita. A questo viene aggiunto un termine di momento per ridurre l'oscillazione lungo il cammino. Di conseguenza,  l'equazione che governa questo processo è: 
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\theta_{l&plus;1}&space;=&space;\theta_l-\alpha&space;\Delta&space;E(\theta_l)&space;&plus;\gamma(\theta_l-\theta_{l-1})" title="\theta_{l+1} = \theta_l-\alpha \Delta E(\theta_l) +\gamma(\theta_l-\theta_{l-1})" /></a>
 
-dove <a href="http://www.codecogs.com/eqnedit.php?latex=\inline&space;\dpi{120}&space;\gamma" target="_blank"><img src="http://latex.codecogs.com/gif.latex?\inline&space;\dpi{120}&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.  Inoltre, si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `InitialLearningRate`=0.0001.
+dove: 
+- *l* è il numero di iterazioni, 
+- <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\alpha&space;>0" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\alpha&space;>0" title="\alpha >0" /></a> è la frequenza di apprendimento, 
+- <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\theta" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\theta" title="\theta" /></a> è il vettore parametro 
+- <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;E(\theta)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;E(\theta)" title="E(\theta)" /></a> è la funzione di perdita
+- <a href="https://www.codecogs.com/eqnedit.php?latex=\inline&space;\gamma" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\inline&space;\gamma" title="\gamma" /></a> determina il contributo del precedente step di gradiente all'iterazione corrente.
+
+Inoltre, per quanto riguarda la `'sgdm'` si è specificata anche la frequenza di apprendimento iniziale, tramite il parametro `'InitialLearningRate'`.
+
 #### 1a. CIFAR10
 Di seguito è riportato lo script relativo al training:
 ```matlab
-  #da trainingCIFAR10.m
-  varSize = 32;
-  conv1 = convolution2dLayer(5,varSize,'Padding',2,'BiasLearnRateFactor',2);
-  conv1.Weights = gpuArray(single(randn([5 5 3 varSize])*0.0001));
-  fc1 = fullyConnectedLayer(64,'BiasLearnRateFactor',2);
-  fc1.Weights = gpuArray(single(randn([64 576])*0.1));
-  fc2 = fullyConnectedLayer(2,'BiasLearnRateFactor',2);
-  fc2.Weights = gpuArray(single(randn([2 64])*0.1));
+#da trainingCIFAR10.m
 
-  layers = [
-      imageInputLayer([varSize varSize 3], 'Name', 'input');
-      conv1;
-      maxPooling2dLayer(3,'Stride',2, 'Name', 'max_pool');
-      reluLayer('Name', 'relu_1');
-      convolution2dLayer(5,32,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_2');
-      reluLayer('Name', 'relu_2');
-      averagePooling2dLayer(3,'Stride',2, 'Name', 'avg_pool_1');
-      convolution2dLayer(5,64,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_3');
-      reluLayer('Name', 'relu_3');
-      averagePooling2dLayer(3,'Stride',2, 'Name','avg_pool_2');
-      fc1;
-      reluLayer('Name', 'relu_4');
-      fc2;
-      softmaxLayer('Name', 'softmax');
-      classificationLayer('Name', 'classification')];
+varSize = 32;
+conv1 = convolution2dLayer(5,varSize,'Padding',2,'BiasLearnRateFactor',2);
+conv1.Weights = gpuArray(single(randn([5 5 3 varSize])*0.0001));
+fc1 = fullyConnectedLayer(64,'BiasLearnRateFactor',2);
+fc1.Weights = gpuArray(single(randn([64 576])*0.1));
+fc2 = fullyConnectedLayer(2,'BiasLearnRateFactor',2);
+fc2.Weights = gpuArray(single(randn([2 64])*0.1));
 
-  opts = trainingOptions('sgdm', ...
-      'InitialLearnRate', 0.001, ...
-      'L2Regularization', 0.004, ...
-      'MaxEpochs', 10, ...
-      'Shuffle','every-epoch', ...
-      'MiniBatchSize', 10, ...
-      'ValidationData',imdsValidation, ...
-      'ValidationFrequency',350, ...
-      'Verbose', true, ...
-      'VerboseFrequency', 350, ...
-      'Plots','training-progress', ...
-      'ExecutionEnvironment', 'auto');
+layers = [
+    imageInputLayer([varSize varSize 3], 'Name', 'input');
+    conv1;
+    maxPooling2dLayer(3,'Stride',2, 'Name', 'max_pool');
+    reluLayer('Name', 'relu_1');
+    convolution2dLayer(5,48,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_2');
+    reluLayer('Name', 'relu_2');
+    averagePooling2dLayer(3,'Stride',2, 'Name', 'avg_pool_1');
+    convolution2dLayer(5,64,'Padding',2,'BiasLearnRateFactor',2, 'Name', 'conv_3');
+    reluLayer('Name', 'relu_3');
+    averagePooling2dLayer(3,'Stride',2, 'Name','avg_pool_2');
+    fc1;
+    reluLayer('Name', 'relu_4');
+    fc2;
+    softmaxLayer('Name', 'softmax');
+    classificationLayer('Name', 'classification')];
 
-  [net, info] = trainNetwork(imdsTrain, layers, opts);
+opts = trainingOptions('sgdm', ...
+    'InitialLearnRate', 0.0001, ...
+    'MaxEpochs', 5, ...
+    'Shuffle','every-epoch', ...
+    'MiniBatchSize', 10, ...
+    'ValidationData',imdsValidation, ...
+    'ValidationFrequency',400, ...
+    'Verbose', true, ...
+    'VerboseFrequency', 400, ...
+    'Plots','training-progress', ...
+    'ExecutionEnvironment', 'auto');
 
-  cifar10_net= net;
-  save cifar10_net
+[net, info] = trainNetwork(imdsTrain, layers, opts);
+
+cifar10_net= net;
+save cifar10_net
 ```
 
 I risultati sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
@@ -202,36 +214,47 @@ I risultati sono visualizzati in tempo reale in Training Progress e sono mostrat
 ![](images/CIFAR10/Training_progress.png) 
 
 
-Per quanto riguarda il testing si è verificato che il valore dell'accuratezza fosse compatibile con quello della validazione ottenuta durante il processo di training. Una volta classificate, le immagini vengono mostrate con la relativa label contrassegnata con il colore rosso se è errata e verde se è giusta. Inoltre, l'accuratezza di testing è fornita dalla media tra i termini della diagonale della matrice di confusione ciascuno normalizzato per il numero totale di esempi di training.
+Per quanto riguarda il testing si è verificato che il valore dell'accuratezza fosse compatibile con quello della validazione ottenuta durante il processo di training. 
+L'accuratezza di testing è fornita dalla media delle labels predette correttamente uguali a quelle di input. In altre parole, l'accuratezza è fornita dalla media tra i termini della diagonale della matrice di confusione ciascuno normalizzato per il numero totale di esempi di training.
+
 Di seguito è riportato lo script relativo al testing:
 ```matlab
-  da TrainingCIFAR10.m
-  load cifar10_net;
-  rootFolder2 = 'cifar10/cifar10Test';
-  imdsTest = imageDatastore(fullfile(rootFolder2, categories), ...
-      'LabelSource', 'foldernames');
-  imdsTest.ReadFcn = @readFunctionTrain;
+#da TrainingCIFAR10.m
 
-  labels = classify(cifar10_net, imdsTest);
+load cifar10_net;
+    rootFolder2 = 'cifar10/cifar10Test';
+imdsTest = imageDatastore(fullfile(rootFolder2, categories), ...
+    'LabelSource', 'foldernames');
+imdsTest.ReadFcn = @readFunctionTrain;
 
-  for i = 1:50
-      ii = randi(2000);
-      im = imread(imdsTest.Files{ii});
-      imshow(im);
-      if labels(ii) == imdsTest.Labels(ii)
-         colorText = 'g'; 
-      else
-          colorText = 'r';
-      end
-      title(char(labels(ii)),'Color',colorText);
-  end
+labels = classify(cifar10_net, imdsTest);
+accuracy = mean(labels == imdsTest.Labels)
 
-  % This could take a while if you are not using a GPU
-  confMat = confusionmat(imdsTest.Labels, labels);
-  confMat2 = confMat./sum(confMat,2);
-  mean(diag(confMat2))
+figure
+plotconfusion(imdsTest.Labels, labels)
 ```
+Di seguito è riportata la matrice di confusione ottenuta in questo caso:
 
+![](images/CIFAR10/Conf_matrix.png) 
+
+
+Una volta classificate, le immagini vengono mostrate con la relativa label che è contrassegnata con il colore rosso se la classificazione è errata e verde se è giusta. In questo caso si è scelto di visualizzare solo un sottoinsieme (10 immagini) di queste immagini di testing tramite le seguenti righe di codice:
+```matlab
+#da TrainingCIFAR10.m
+
+for i = 1:10
+    ii = randi(2000);
+    im = imread(imdsTest.Files{ii});
+    figure
+    imshow(im);
+    if labels(ii) == imdsTest.Labels(ii)
+       colorText = 'g'; 
+    else
+        colorText = 'r';
+    end
+    title(char(labels(ii)),'Color',colorText);
+end
+```
 Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 
 ![](images/CIFAR10/testing1.png) 
@@ -246,13 +269,17 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/CIFAR10/testing10.png)
 
 #### 1b. MyNet
-Lo script relativo al training è lo stesso di CIFAR10, cambiando il nome delle directory di input e del network. In questo modo cambiano le immagini di input e i vari outputs e non vengono riportate per questioni di brevità.
+Lo script relativo al training è lo stesso di CIFAR10, cambiando il nome delle directory di input e del network e non è riportato per questioni di brevità. Facendo le modifiche già esplicitate, cambiano sia le immagini di input che i vari outputs.
 
 I risultati sono visualizzati in tempo reale in Training Progress e sono mostrati nella seguente figura:
 
 ![](images/MyNet/Training_progress.png) 
 
-Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+La matrice di confusione ottenuta in questo caso è la seguente:
+
+![](images/MyNet/Conf_matrix.png)
+
+Le 10 immagini risultanti dal testing di CIFAR10 sono le seguenti:
 
 ![](images/MyNet/Testing1.png) 
 ![](images/MyNet/Testing2.png) 
@@ -268,11 +295,11 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 
 ### 2. CNN da zero con Augmenting
 #### 2a. CIFAR10
-In questo caso, per il training della CNN si è utilizzata la stessa architettura, già mostrata nella sezione *1a. CIFAR10*. Sono differenti, tuttavia, le immagini di input che prima vengono:
+In questo caso, per il training della CNN si è utilizzata l'architettura già mostrata nella sezione *1a. CIFAR10*. Tuttavia, sono differenti le immagini di input in quanto prima di essere sottoposte alla CNN vengono:
 - riflesse rispetto all'asse orizzontale con una probabilità del 50%;
 - scalate in maniera random sull'asse delle x entro i limiti definiti;
 - tagliate in maniera random lungo l'asse delle y entro i limiti definiti.
-Queste operazioni geometriche sono permesse grazie il seguente script:
+Queste operazioni geometriche sono definite nelle seguenti righe di codice:
 ```matlab
   #da AugmentCIFAR10.m
   
@@ -289,7 +316,11 @@ I risultati dell'allenamento sono visualizzati in tempo reale in Training Progre
 
 ![](images/AugmentCIFAR10/Training_progress.png) 
 
-Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+La matrice di confusione ottenuta in questo caso è la seguente:
+
+![](images/AugmentCIFAR10/Conf_matrix.png)
+
+Le 10 immagini risultanti dal testing di AugmentCIFAR10 sono le seguenti:
 
 ![](images/AugmentCIFAR10/Testing1.png) 
 ![](images/AugmentCIFAR10/Testing2.png) 
@@ -303,7 +334,7 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/AugmentCIFAR10/Testing10.png)
 
 #### 2b. MyNet
-Anche in questo caso si sono eseguite le stesse operazioni di augmenting esplicitate nella sezione *2a. CIFAR10* per allenare il network su immagini diverse rispetto a quelle di input e notare se le performance migliorassero o peggiorassero.
+Anche in questo caso si sono eseguite le stesse operazioni di augmentation esplicitate nella sezione *2a. CIFAR10* per allenare il network su immagini diverse rispetto a quelle di input e valutare un miglioramento o un peggioramento delle performance.
 
 Le prime 8 immagini modificate sono mostrate di seguito:
 ![](images/AugmentMyNet/augment_my_net_images.png) 
@@ -312,7 +343,11 @@ I risultati dell'allenamento sono visualizzati in tempo reale in Training Progre
 
 ![](images/AugmentMyNet/Training_progress.png) 
 
-Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+La matrice di confusione ottenuta in questo caso è la seguente:
+
+![](images/AugmentMyNet/Conf_matrix.png)
+
+Le 10 immagini risultanti dal testing di AugmentMyNet sono le seguenti:
 
 ![](images/AugmentMyNet/Testing1.png) 
 ![](images/AugmentMyNet/Testing2.png) 
@@ -326,30 +361,36 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/AugmentMyNet/Testing10.png)
 
 ### 3. CNN con transfer learning
-#### 3a. CIFAR10
-Si è utilizzato un network pre-allenato chiamato `AlexNet` che è una CNN allenata su più di un milione di immagini provenienti dal database ImageNet contenente immagini di varie categorie, tra cui anche animali, nello specifico cani e gatti. Il vantaggio nell'usare il transfer learning consiste solitamente in una maggiore velocità e facilità di ritocchi del network e nel fatto che possa essere usato anche quando non si ha a disposizione un grande numero di immagini di training.
-Tramite le seguenti righe di codice è possibile guardare la struttura interna di questo network e capire come adattarla.
+Si è utilizzato un network pre-allenato chiamato `AlexNet` che è una CNN allenata su più di un milione di immagini provenienti dal database **ImageNet** contenente immagini di varie categorie, tra cui anche animali comprendenti cani e gatti. 
+
+Tra i vantaggi del transfer learning è possibile individuare:
+- maggiore velocità e facilità di ritocchi del network;
+- possibilità di utilizzo anche quando non si ha a disposizione un grande numero di immagini di training.
+
+Tramite le seguenti righe di codice è possibile osservare la struttura interna di questo network per capire come adattarla.
 ```matlab
   net = alexnet;
   analyzeNetwork(net)
 ```
-Dall'analisi della struttura è emerso che gli ultimi tre strati dovessero essere adattati alla classificazione desiderata. Nello specifico, mentre nella struttura originale il 23-esimo strato è uno strato fully-connected con output 1000 in quanto l'obiettivo è la classificazione di immagini tra 1000 classi; nel network modificato il 23-esimo strato ha output 2 in quantola classificazione è legata solo a due classi (ovvero *Cat* e *Dog*).
+
+Dall'analisi della struttura è emerso che gli ultimi tre strati dovessero essere adattati alla classificazione desiderata.
+Nello specifico, mentre nella struttura originale il 23-esimo strato è uno strato fully-connected con output 1000 in quanto l'obiettivo originale di questo modello pre-allenato è la classificazione di immagini tra 1000 classi; nel network modificato e adattato a questo progetto il 23-esimo strato ha output 2 poichè la classificazione è legata solo a due classi (ovvero *Cat* e *Dog*).
 
 In definitiva, la CNN è costituita da 25 strati e ha la seguente architettura:
 1. Livello di Input che ha le stesse dimensioni delle immagini in input (in questo caso, [227x227x3]);
-2. Livello di Convoluzione 2-dim con 96 filtri(kernels) di dimensioni 11x11x3 e passo di [4 4];
+2. Livello di Convoluzione 2-dim con 96 filtri(kernels) di dimensioni 11x11x3 e passo di dimensione [4 4];
 3. Livello di passaggio per la funzione ReLU;
 4. Livello di Cross Channel Normalization con 5 canali per elemento;
 5. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
-6. Livello di Convoluzione 2-dim con 256 filtri (kernels) di dimensioni 5x5x48, passo di dimensione [1 1], zero-padding di dimensione [2 2 2 2];
+6. Livello di Convoluzione 2-dim con 256 filtri di dimensioni 5x5x48, passo di dimensione [1 1] e zero-padding di dimensione [2 2 2 2];
 7. Livello di passaggio per la funzione ReLU;
 8. Livello di Cross Channel Normalization con 5 canali per elemento;
 9. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
-10. Livello di Convoluzione 2-dim con 384 filtri (kernels) di dimensioni 3x3x256, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+10. Livello di Convoluzione 2-dim con 384 filtri di dimensioni 3x3x256, passo di dimensione [1 1] e zero-padding di dimensione [1 1 1 1];
 11. Livello di passaggio per la funzione ReLU;
-12. Livello di Convoluzione 2-dim con 384 filtri (kernels) di dimensioni 3x3x192, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+12. Livello di Convoluzione 2-dim con 384 filtri di dimensioni 3x3x192, passo di dimensione [1 1] e zero-padding di dimensione [1 1 1 1];
 13. Livello di passaggio per la funzione ReLU;
-14. Livello di Convoluzione 2-dim con 256 filtri (kernels) di dimensioni 3x3x192, passo di dimensione [1 1], zero-padding di dimensione 1 1 1 1];
+14. Livello di Convoluzione 2-dim con 256 filtri di dimensioni 3x3x192, passo di dimensione [1 1], zero-padding di dimensione [1 1 1 1];
 15. Livello di passaggio per la funzione ReLU;
 16. Livello di Max Pooling 2-dim con dimensione di pool 3x3 e passo di dimensione [2 2];
 17. Livello Fully Connected con 4096 outputs;
@@ -362,9 +403,9 @@ In definitiva, la CNN è costituita da 25 strati e ha la seguente architettura:
 24. Livello per la funzione di perdita 'softmax';
 25. Livello finale di classificazione.
 
-Anche in questo caso per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte e per ogni iterazione di allenamento il dataset è processato in maniera che un sottoinsieme del set di training, definito dalla variabile `MiniBatchSize` venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi.
+Anche in questo caso per l'addestramento della CNN si sottopone alla rete neurale l'intero dataset mescolato più volte e per ogni iterazione di allenamento il dataset è processato in maniera che il sottoinsieme del set di training, definito dalla variabile `'MiniBatchSize'`, venga usato per valutare il gradiente della funzione di perdita e aggiornare i pesi. Come precedentemente, si è specificato il rimescolamento ad ogni epoch tramite la variabile `'Shuffle'`.
 
-Come funzione di errore viene utilizzata `sgdm` con momento lasciato di default e frequenza di apprendimento iniziale pari a `InitialLearnRate`=0.0001.
+Come funzione di errore viene utilizzata `'sgdm'` con momento lasciato di default e frequenza di apprendimento iniziale `'InitialLearnRate'`.
 
 #### 3a. CIFAR10
 Di seguito è riportato lo script relativo al training:
@@ -403,8 +444,13 @@ I risultati dell'allenamento sono visualizzati in tempo reale in Training Progre
 
 ![](images/TransfLearningCIFAR10/Training_progress.png) 
 
-Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il train set e il nome del network.
-Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il training set e il nome del network.
+
+La matrice di confusione ottenuta in questo caso è la seguente:
+
+![](images/TransfLearningCIFAR10/Conf_matrix.png)
+
+Le 10 immagini risultanti dal testing di TransfLearningCIFAR10 sono le seguenti:
 
 ![](images/TransfLearningCIFAR10/Testing1.png) 
 ![](images/TransfLearningCIFAR10/Testing2.png) 
@@ -424,8 +470,13 @@ I risultati dell'allenamento sono visualizzati in tempo reale in Training Progre
 
 ![](images/TransfLearningMyNet/Training_progress.png) 
 
-Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il train set e il nome del network.
-Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
+Il testing è stato eseguito come mostrato nella sezione *1a. CIFAR10*, modificando opportunamente il training set e il nome del network.
+
+La matrice di confusione ottenuta in questo caso è la seguente:
+
+![](images/TransfLearningMyNet/Conf_matrix.png)
+
+Le 10 immagini risultanti dal testing di TransfLearningMyNet sono le seguenti:
 
 ![](images/TransfLearningMyNet/Testing1.png) 
 ![](images/TransfLearningMyNet/Testing2.png) 
@@ -439,18 +490,20 @@ Di seguito sono riportate 10 immagini risultanti dal testing di CIFAR10:
 ![](images/TransfLearningMyNet/Testing10.png)
 
 ## Risultati e commenti finali
-Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% training, 20% validation e stesso numero di esempi tra validation e testing (tenendo contro che il testing è realizzato con nuovi esempi), sono i seguenti:
+Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% training, 20% validation e stesso numero di esempi tra validation e testing (si ricorda che il testing è realizzato con nuovi esempi), sono i seguenti:
 
 |CNN per CIFAR10|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
 |:--|:--:|:--:|:--:|
-|1. Da zero|580/2000|71.0%|73.05%|
-|2. Da zero + Augumentation|636/2000|68.2%|68.25%|
-|3. Pre-allenata con AlexNet|220/2000|89.0%|89.15%|
+|1. Da zero|580/2000|71.0%|70.8%|
+|2. Da zero + Augumentation|636/2000|68.0%|68.3%|
+|3. Pre-allenata con AlexNet|220/2000|89.0%|89.2%|
 
 |CNN per MyNet|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
 |:--|:--:|:--:|:--:
-|1. Da zero|491/2000|75.4%|75.55%|
-|2. Da zero + Augmentation|560/2000|72.0%|71.90%|
-|3. Pre-allenata con AlexNet|53/2000|97.4%|97.25%|
+|1. Da zero|491/2000|75.4%|75.6%|
+|2. Da zero + Augmentation|560/2000|72.0%|71.9%|
+|3. Pre-allenata con AlexNet|53/2000|97.4%|97.3%|
 
-Osservando la tabella è possibile notare come, nonostante i dataset siano diversi, in entrambi i casi il classificatore migliore sia quello basato sulla CNN pre-allenata con AlexNet. Questo risultato è compatibile con quanto ci si aspetti dalla teoria in quanto è formato da un maggiore numero di strati ed è pre-allenato su altre immagini tra cui quelle delle stesse categorie rispetto a quelle che si vogliono classificare.
+Osservando la tabella è possibile notare come, nonostante la diversità dei dataset, in entrambi i casi il classificatore migliore sia quello basato sulla CNN pre-allenata con AlexNet. Questo risultato è compatibile con quanto ci si aspetta dalla teoria ed è spiegabile con il fatto che questa CNN è formata da un maggiore numero di strati (più parametri in gioco, maggiore ottimizzazione) ed è pre-allenata su altre immagini tra cui quelle delle stesse categorie rispetto a quelle che si vogliono classificare.
+
+Al contrario, il classificatore peggiore risulta quello basato sulla CNN da 0 che è allenato su immagini augmented. Questo è dovuto probabilmente al fatto che il testing è fatto tramite immagini che sono più simili a quelle di input che a quelle modificate attraverso le operazioni geometriche esplicitate. 
