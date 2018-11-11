@@ -1,4 +1,4 @@
-# Classificazione di cani e gatti: confronto di CNN e SVM
+# Confronto di CNN e SVM per la classificazione di cani e gatti
 ## Elaborato per il corso di Analisi delle Immagini
 ### Miriam Santoro
 #### aa. 2017/2018, Università di Bologna - Corso di laurea magistrale in Fisica Applicata
