@@ -1,4 +1,4 @@
-# Confronto di CNN per la classificazione di cani e gatti
+# Classificazione di cani e gatti: confronto di CNN e SVM
 ## Elaborato per il corso di Analisi delle Immagini
 ### Miriam Santoro
 #### aa. 2017/2018, Università di Bologna - Corso di laurea magistrale in Fisica Applicata
@@ -7,7 +7,8 @@
 Il presente lavoro è stato realizzato in linguaggio `matlab` e si pone come obiettivo l'implementazione e la valutazione di:
 1. Rete neurale convoluzionale (CNN) da zero;
 2. Rete neurale convoluzionale (CNN) da zero + Augment del dataset;
-3. Modello di CNN pre-allenato (`AlexNet`).
+3. Rete neurale convoluzionale (CNN) basata su un modello di CNN pre-allenato (`AlexNet`);
+4. SVM a partire da `AlexNet`.
 
 Queste tre casistiche sono state applicate a due dataset diversi, ovvero:
 1. `CIFAR10`
@@ -27,7 +28,9 @@ Le reti neurali sono state implementate in 6 script diversi, a seconda della lor
 - `Training_AugmentCIFAR10.m` contiene la CNN allenata da 0 sulle immagini augmented del dataset CIFAR10;
 - `Training_Augment.m` contiene la CNN allenata da 0 sulle immagini augmented del dataset Kaggle;
 - `TrasfLearning_CIFAR10.m` contiene la CNN AlexNet pre-allenata adattata alle immagini del dataset CIFAR10;
-- `TrasfLearning.m` contiene la CNN AlexNet pre-allenata adattata alle immagini del dataset Kaggle.
+- `TrasfLearning.m` contiene la CNN AlexNet pre-allenata adattata alle immagini del dataset Kaggle;
+- `SVM_CIFAR10.m` contiene la SVM utilizzata sul dataset CIFAR10;
+- `SVM_MyNey.m` contiene la SVM utilizzata sul dataset Kaggle.
 
 ## Dataset (Note preliminari)
 Di seguito si descrivono i dataset utilizzati per ogni CNN. Entrambi i dataset possiedono 5000 elementi per il training e 1000 elementi per il testing e questa divisione è stata realizzata al fine di evitare errori di overfitting.
@@ -489,6 +492,131 @@ Le 10 immagini risultanti dal testing di TransfLearningMyNet sono le seguenti:
 ![](images/TransfLearningMyNet/Testing9.png) 
 ![](images/TransfLearningMyNet/Testing10.png)
 
+### 4.SVM
+L'approccio sfruttato in questo caso può essere inteso come 'ponte' tra il Deep Learning e il Machine Learning. Nello specifico si utilizza la CNN `AlexNet` come estrattore di features che successivamente sono utilizzate come input per le support vector machines (SVM).  Questo è possibile poichè, siccome tutti i layer hanno il compito di apprendere determinate features, esse possono essere estratte dalla rete in qualsiasi momento durante l'addestramento. 
+
+Le features più semplici come gli spigoli sono rilevate nel primo strato convoluzionale (*conv1*) mentre quelle più difficili vengono apprese negli strati successivi che combinano le features degli strati precedenti.
+
+#### 4a.CIFAR10
+In questo caso, non è stato utilizzato il validation set, non dovendo aggiustare i parametri della CNN. Da ciò consegue l'utilizzo di 5000 immagini per il training (contro le 4000 dei casi precedenti) e 1000 di testing.
+Tramite le seguenti righe di codice, si è presa in considerazione un'immagine di training e sono state generate:
+1. un'immagine che mostra tutti i canali relativi alle funzioni di attivazione del primo livello convoluzionale;
+2. un'immagine che mostra il canale avente la funzione di attivazione più forte (spigoli più accentuati).
+
+```matlab
+%da SVM_CIFAR10.m
+
+%Show activations in first convolutional layer
+figure
+M = readimage(imdsTrain,2);
+imshow(M)
+act1=activations(net,M,'conv1');
+sz = size(act1);
+act1 = reshape(act1,[sz(1) sz(2) 1 sz(3)]);
+
+figure
+L = montage(mat2gray(act1))
+
+[maxValue,maxValueIndex] = max(max(max(act1)));
+act1chMax = act1(:,:,:,maxValueIndex);
+act1chMax = mat2gray(act1chMax);
+
+%Show strongest channel
+figure
+N = montage({M,act1chMax});
+```
+
+I risultati sono mostrati di seguito.
+![](images/SVM_CIFAR10/Train_Dog1.png)
+![](images/SVM_CIFAR10/Train_Dog1_Activations.png)
+![](images/SVM_CIFAR10/Train_Dog1_vs_Strongest_Activation.png)
+
+Nelle seguenti righe di codice è riportato il procedimento di:
+- training comprendente:
+    - estrazione delle features dallo strato `fc7`, in quanto contenente features di alto-livello essendo più in profondità;
+    - fitting del classificatore di immagini (SVM) tramite la funzione `fitcecoc`.
+- testing comprendente:
+    - classificazione e previsione delle immagini di testing tramite la funzione `predict`;
+    - display di 10 immagini di testing;
+    - display dell'accuratezza e della matrice di confusione.
+
+```matlab
+%da SVM_CIFAR10.m
+
+net = alexnet;
+layer = 'fc7';
+featuresTrain = activations(alexnet,imdsTrain,layer,'OutputAs','rows');
+featuresTest = activations(alexnet,imdsTest,layer,'OutputAs','rows');
+
+YTrain = imdsTrain.Labels;
+YTest = imdsTest.Labels;
+
+classifier = fitcecoc(featuresTrain,YTrain);
+
+%Display some images
+YPred = predict(classifier,featuresTest);
+
+for i = 1:10
+    ii=randi(2000);
+    I = imread(imdsTest.Files{ii});
+    figure
+    imshow(I);
+    if YPred(ii) == YTest(ii)
+       colorText = 'g'; 
+    else
+        colorText = 'r';
+    end
+    title(char(YPred(ii)),'Color',colorText);
+end
+
+accuracy = mean(YPred == YTest)
+
+figure
+plotconfusion(YTest, YPred)
+```
+
+Le 10 immagini risultanti dal testing sono le seguenti.
+![](images/SVM_CIFAR10/Testing1.png) 
+![](images/SVM_CIFAR10/Testing2.png) 
+![](images/SVM_CIFAR10/Testing3.png) 
+![](images/SVM_CIFAR10/Testing4.png) 
+![](images/SVM_CIFAR10/Testing5.png) 
+![](images/SVM_CIFAR10/Testing6.png) 
+![](images/SVM_CIFAR10/Testing7.png) 
+![](images/SVM_CIFAR10/Testing8.png)
+![](images/SVM_CIFAR10/Testing9.png) 
+![](images/SVM_CIFAR10/Testing10.png)
+
+La matrice di confusione è mostrata di seguito.
+![](images/SVM_CIFAR10/Conf_matrix.png)
+
+
+#### 4b.MyNet
+Si è utilizzato lo stesso codice mostrato in sezione *4a.CIFAR10*, cambiando opportunamente il dataset.
+
+Un'immagine di training, l'immagine corrispondente che mostra tutti i canali del primo strato convoluzionale e quella che mostra il canale con la funzione di attivazione più forte sono mostrate di seguito.
+
+![](images/SVM_MyNet/Train_Dog1.png)
+![](images/SVM_MyNet/Train_Dog1_Activations.png)
+![](images/SVM_MyNet/Train_Dog1_vs_Strongest_Activation.png)
+
+Le 10 immagini risultanti dal testing sono le seguenti.
+
+![](images/SVM_MyNet/Testing1.png) 
+![](images/SVM_MyNet/Testing2.png) 
+![](images/SVM_MyNet/Testing3.png) 
+![](images/SVM_MyNet/Testing4.png) 
+![](images/SVM_MyNet/Testing5.png) 
+![](images/SVM_MyNet/Testing6.png) 
+![](images/SVM_MyNet/Testing7.png) 
+![](images/SVM_MyNet/Testing8.png)
+![](images/SVM_MyNet/Testing9.png) 
+![](images/SVM_MyNet/Testing10.png)
+
+La matrice di confusione è mostrata di seguito.
+![](images/SVM_MyNet/Conf_matrix.png)
+
+
 ## Risultati e commenti finali
 Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% training, 20% validation e stesso numero di esempi tra validation e testing (si ricorda che il testing è realizzato con nuovi esempi), sono i seguenti:
 
@@ -497,13 +625,26 @@ Una volta fatto girare il programma i risultati ottenuti tenendo conto di 80% tr
 |1. Da zero|580/2000|71.0%|70.8%|
 |2. Da zero + Augumentation|636/2000|68.0%|68.3%|
 |3. Pre-allenata con AlexNet|220/2000|89.0%|89.2%|
+|4. SVM|390/2000|80.5%|/|
 
 |CNN per MyNet|Errori Commessi|Percentuale letta correttamente (Testing)|Percentuale letta correttamente (Validation)|
 |:--|:--:|:--:|:--:
 |1. Da zero|491/2000|75.4%|75.6%|
 |2. Da zero + Augmentation|560/2000|72.0%|71.9%|
 |3. Pre-allenata con AlexNet|53/2000|97.4%|97.3%|
+|4. SVM|77/2000|96.2%|/|
 
 Osservando la tabella è possibile notare come, nonostante la diversità dei dataset, in entrambi i casi il classificatore migliore sia quello basato sulla CNN pre-allenata con AlexNet. Questo risultato è compatibile con quanto ci si aspetta dalla teoria ed è spiegabile con il fatto che questa CNN è formata da un maggiore numero di strati (più parametri in gioco, maggiore ottimizzazione) ed è pre-allenata su altre immagini tra cui quelle delle stesse categorie rispetto a quelle che si vogliono classificare.
 
+Nonostante il classificatore basato sulla SVM non è risultato essere il migliore, è possibile notale come raggiunga un'accuratezza il cui valore si avvicina molto a quello del classificatore CNN pre-allenato con AlexNet. Questo ritorna vantaggioso quando non si ha la possibilità di utilizzare la GPU ma non si vogliono attendere tempi computazionali troppo lunghi in quanto, siccome l'estrazione delle features richiede solo un singolo passaggio attraverso i dati, non richiede accelerazione per il training. Nella tabella mostrata nella sezione *Extra* è possibile visualizzare i tempi ottenuti nella fase di training.
+
 Al contrario, il classificatore peggiore risulta quello basato sulla CNN da 0 che è allenato su immagini augmented. Questo è dovuto probabilmente al fatto che il testing è fatto tramite immagini che sono più simili a quelle di input che a quelle modificate attraverso le operazioni geometriche esplicitate. 
+
+## Extra
+Di seguito, per completezza, sono riportati i tempi di training nelle varie casistiche e per i due dataset.
+|CNN|Tempo di Training per CIFAR10|Tempo di Training per MyNet|
+|:--|:--:|:--:|
+|1. Da zero|3 min 22 sec|8 min 11 sec|
+|2. Da zero + Augmentation|3 min 53 sec|9 min 53 sec|
+|3. Pre-allenata con AlexNet|22 min 43 sec|29 min 25 sec|
+|4. SVM|6 min 58 sec|6 min 28 sec|
