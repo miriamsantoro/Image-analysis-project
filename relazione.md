@@ -642,6 +642,7 @@ Al contrario, il classificatore peggiore risulta quello basato sulla CNN da 0 ch
 
 ## Extra
 Di seguito, per completezza, sono riportati i tempi di training nelle varie casistiche e per i due dataset.
+
 |CNN|Tempo di Training per CIFAR10|Tempo di Training per MyNet|
 |:--|:--:|:--:|
 |1. Da zero|3 min 22 sec|8 min 11 sec|
