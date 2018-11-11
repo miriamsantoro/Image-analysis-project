@@ -167,7 +167,7 @@ Inoltre, per quanto riguarda la `'sgdm'` si è specificata anche la frequenza di
 #### 1a. CIFAR10
 Di seguito è riportato lo script relativo al training:
 ```matlab
-#da trainingCIFAR10.m
+%da TrainingCIFAR10.m
 
 varSize = 32;
 conv1 = convolution2dLayer(5,varSize,'Padding',2,'BiasLearnRateFactor',2);
@@ -222,7 +222,7 @@ L'accuratezza di testing è fornita dalla media delle labels predette correttame
 
 Di seguito è riportato lo script relativo al testing:
 ```matlab
-#da TrainingCIFAR10.m
+%da TrainingCIFAR10.m
 
 load cifar10_net;
     rootFolder2 = 'cifar10/cifar10Test';
@@ -243,7 +243,7 @@ Di seguito è riportata la matrice di confusione ottenuta in questo caso:
 
 Una volta classificate, le immagini vengono mostrate con la relativa label che è contrassegnata con il colore rosso se la classificazione è errata e verde se è giusta. In questo caso si è scelto di visualizzare solo un sottoinsieme (10 immagini) di queste immagini di testing tramite le seguenti righe di codice:
 ```matlab
-#da TrainingCIFAR10.m
+%da TrainingCIFAR10.m
 
 for i = 1:10
     ii = randi(2000);
@@ -304,7 +304,7 @@ In questo caso, per il training della CNN si è utilizzata l'architettura già m
 - tagliate in maniera random lungo l'asse delle y entro i limiti definiti.
 Queste operazioni geometriche sono definite nelle seguenti righe di codice:
 ```matlab
-  #da AugmentCIFAR10.m
+  %da AugmentCIFAR10.m
   
   augmenter = imageDataAugmenter( ...
     'RandXReflection', true(1), ...
@@ -413,7 +413,7 @@ Come funzione di errore viene utilizzata `'sgdm'` con momento lasciato di defaul
 #### 3a. CIFAR10
 Di seguito è riportato lo script relativo al training:
 ```matlab
-  #da TransfLearning_CIFAR10.m
+  %da TransfLearning_CIFAR10.m
   
   net = alexnet;
   layersTransfer = net.Layers(1:end-3);
