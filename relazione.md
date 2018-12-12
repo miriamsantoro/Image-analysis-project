@@ -38,7 +38,7 @@ Inoltre, le 5000 immagini di training sono  ulteriormente divise in 80% training
 
 Per adattare i dataset alle dimensioni di input delle CNN sono usati gli script:
 - `readFunctionTrain` per la CNN da 0 e la CNN con l'augmentation. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere in output un'immagine di dimensione 32x32;
-- `readFunctionTrain2` per la CNN basata su AlexNet. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere in output un'immagine di dimensione 227x227.
+- `readFunctionTrain2` per la CNN basata su AlexNet e la SVM. Questa funzione è in grado di ridimensionare ogni immagine di input in maniera da avere in output un'immagine di dimensione 227x227.
 
 In realtà, ogni immagine, essendo a colori, ha dimensioni [n_pixel x n_pixel x 3].
 ### CIFAR10
@@ -99,7 +99,7 @@ Di seguito sono riportate e spiegate le varie tipologie di layers utilizzate nel
 - **Livello di Input** dell'immagine: immette le immagini nella rete e applica la normalizzazone dei dati.
 
 - **Livello di Convoluzione 2-dim**: applica filtri convoluzionali all'input. In questo livello viene eseguita la convoluzione che è un'operazione che consiste nel muovere filtri di specifiche dimensioni verticalmente e orizzontalmente sull'immagine di input, calcolare il prodotto scalare dei pesi e aggiungere, eventualmente, un termine di bias.
-I parametri del livello consistono, quindi, in un set di filtri apprendibili (o kernel), che hanno un piccolo campo recettivo, ma si estendono lungo tutta la pronfondità del volume di input, compiono convoluzione durante il passaggio all'indietro (forward) ogni filtro fa convoluzione lungo il volume di input e producono una mappa di attivazione 2-dim. L'operazione di convoluzione riduce il numero di parametri liberi, permettendo al network di essere più profondo con meno parametri. Ad esempio, usare regioni di dimensione 5x5, ognuna con gli stessi pesi condivisi, richiede solo 25 parametri apprendibili. In questo modo, risolve il problema dei gradienti che svaniscono o esplodono nell'allenamento tradizionale di network neurali multi-strato. 
+I parametri del livello consistono, quindi, in un set di filtri apprendibili (o kernel), che hanno un piccolo campo recettivo, ma si estendono lungo tutta la pronfondità del volume di input, compiono convoluzione durante il passaggio all'indietro (forward) e producono una mappa di attivazione 2-dim. L'operazione di convoluzione riduce il numero di parametri liberi, permettendo al network di essere più profondo con meno parametri. Ad esempio, usare regioni di dimensione 5x5, ognuna con gli stessi pesi condivisi, richiede solo 25 parametri apprendibili. In questo modo, risolve il problema dei gradienti che svaniscono o esplodono nell'allenamento tradizionale di network neurali multi-strato. 
 
     - La dimensione di step con cui il filtro si muove è chiamata `'Stride'` ed è regolabile. 
 
@@ -120,7 +120,7 @@ Quindi si passa da cluster di neuroni nello strato di partenza a singoli neuroni
 
 - **Livello Fully Connected**: collega i neuroni a tutte le attivazioni nel livello precedente. L'attivazione è calcolata moltiplicando gli input per una matrice di pesi e aggiungendo un vettore di bias.
 
-- **Livello per la funzione di perdita 'softmax'**: specifica come l'allenamento penalizzi la deviazione tra labels predette e vere. Questo strato definisce la funzione di attivazione di output, ovvero:
+- **Livello per la funzione di attivazione 'softmax'**: specifica come l'allenamento penalizzi la deviazione tra labels predette e vere. Questo strato definisce la funzione di attivazione di output, ovvero:
 
    <a href="https://www.codecogs.com/eqnedit.php?latex=y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?y_r(x)&space;=\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" title="y_r(x) =\frac{exp(a_r(x)}{\sum^k_{j=1}exp(a_j(x))}" /></a>
 
